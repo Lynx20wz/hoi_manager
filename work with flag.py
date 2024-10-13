@@ -21,7 +21,7 @@ BASE_IDEOLOGY = ["fascism", "communism", "neutrality", "democratic"]
 
 
 class App(customtkinter.CTk):
-    def __init__(self) -> 'App':
+    def __init__(self):
         """
         Инициализация основного приложения. Устанавливает параметры окна, создает и конфигурирует элементы управления.
         :var self.correct_tag: Проверка на корректный тэг
@@ -41,7 +41,7 @@ class App(customtkinter.CTk):
         """
         super().__init__()
         self.geometry(f"{WEIGHT_APP}x{HEIGHT_APP}")
-        self.resizable(False, True)
+        self.resizable(False, False)
         self.title("Создатель флагов")
         self.columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -400,10 +400,13 @@ class App(customtkinter.CTk):
     def remove_entry(self, frame_to_remove):
         if frame_to_remove in self.frames_with_entry_custom_ideologies:
             frame_to_remove.grid_forget()
+            ideology_remove = frame_to_remove.children.get('!ctkentry').get()
             for menu in self.ideologies_menus:
-                for entry_values in self.custom_ideologies_entry_values:
-                    if menu.get() == entry_values:
-                        menu.set('')
+                if menu.get() == ideology_remove:
+                    menu.set('')
+            for select in self.selected.values():
+                if select[1] == ideology_remove:
+                    select[1] = ''
             self.frames_with_entry_custom_ideologies.remove(frame_to_remove)
 
             print(len(self.selected))
@@ -466,7 +469,9 @@ class App(customtkinter.CTk):
         """
         Проверяет состояние кнопки 'Начать' и активирует её, если все условия выполнены.
         """
-        if self.folder_path and self.flags_folder_path and self.correct_tag and all(self.selected.values()) and self.correct_ideologies:
+        if self.folder_path and self.flags_folder_path and self.correct_tag and all(
+                select[0] and select[1] for select in self.selected.values()
+        ) and self.correct_ideologies:
             self.start.configure(state='normal', fg_color=C_BLUE)
         else:
             self.start.configure(state='disabled', fg_color='gray')
