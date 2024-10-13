@@ -4,16 +4,17 @@ import time
 from tkinter import filedialog
 from typing import Optional
 
-from PIL import Image
 import customtkinter
+from CTkMessagebox import *
 from CTkToolTip import *
+from PIL import Image
 
 customtkinter.set_appearance_mode("System")
 
 C_BLUE = '#26658d'
 C_DBLUE = '#318405a'
 C_DGREY = '#4d4d4d'
-sizes = [(82, 52), (41, 26), (10, 7)]
+SIZES = [(82, 52), (41, 26), (10, 7)]
 WEIGHT_APP = 800
 HEIGHT_APP = 350
 BASE_IDEOLOGY = ["fascism", "communism", "neutrality", "democratic"]
@@ -40,7 +41,7 @@ class App(customtkinter.CTk):
         """
         super().__init__()
         self.geometry(f"{WEIGHT_APP}x{HEIGHT_APP}")
-        self.resizable(False, False)
+        self.resizable(False, True)
         self.title("Создатель флагов")
         self.columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -64,19 +65,12 @@ class App(customtkinter.CTk):
         # Пустой фрэйм где будут флаги
         self.frame_ideology = customtkinter.CTkFrame(self)
         self.frame_ideology.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
-        self.frame_ideology.columnconfigure(0, weight=1)
-        self.frame_ideology.columnconfigure(1, weight=1)
-        self.frame_ideology.columnconfigure(2, weight=1)
-        self.frame_ideology.columnconfigure(3, weight=1)
-        self.frame_ideology.columnconfigure(4, weight=1)
-        self.frame_ideology.rowconfigure(0, weight=1)
-        self.frame_ideology.rowconfigure(1, weight=1)
+        self.frame_ideology.columnconfigure((0, 1, 2, 3, 4), weight=1)
+        self.frame_ideology.rowconfigure((0, 1), weight=1)
 
         self.topbar = customtkinter.CTkFrame(self, fg_color='transparent')
         self.topbar.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
-        self.topbar.columnconfigure(0, weight=1)
-        self.topbar.columnconfigure(1, weight=1)
-        self.topbar.columnconfigure(2, weight=1)
+        self.topbar.columnconfigure((0, 1, 2), weight=1)
         self.topbar.rowconfigure(0, weight=1)
 
         self.button_open_folder = customtkinter.CTkButton(
@@ -168,11 +162,14 @@ class App(customtkinter.CTk):
         """
         self.folder_path: str = filedialog.askdirectory(title='Выберете папку с флагами')
         if self.folder_path:
-            self.button_open_folder.configure(fg_color=C_BLUE)
             if any(frame.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.tga')) for frame in os.listdir(self.folder_path)):
-                self.load_flags(self.folder_path)
-            self.check_custom_ideologies.configure(state='normal')
-            self.check_start_button_state()
+                load = self.load_flags(self.folder_path)
+            if load:
+                self.button_open_folder.configure(fg_color=C_BLUE)
+                self.check_custom_ideologies.configure(state='normal')
+                self.check_start_button_state()
+            else:
+                pass
         else:
             self.folder_path = ''
             self.button_open_folder.configure(fg_color='red', text='Папка не выбрана!')
@@ -197,7 +194,7 @@ class App(customtkinter.CTk):
             time.sleep(1)
             self.button_open_flags_folder.configure(fg_color='grey', text='Открыть папку flags')
 
-    def load_flags(self, path):
+    def load_flags(self, path) -> Optional[bool]:
         """
         Загружает изображения из выбранной папки и инициализирует элементы интерфейса для выбора идеологий.
 
@@ -215,6 +212,11 @@ class App(customtkinter.CTk):
             self.flags_folder_path = None
         images = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.tga'))]
         num_flags = len(images)
+
+        if num_flags >= 11:
+            self.list_frames.clear()
+            CTkMessagebox(title='Ошибка', message='На данный момент доступно не более 10 флагов за раз!')
+            return None
 
         # Frame с идеологиями
         for v in range(num_flags + (5 // num_flags)):
@@ -278,6 +280,7 @@ class App(customtkinter.CTk):
                 )
                 ideology_menu.set('')
                 ideology_menu.grid(row=1, column=0, padx=5, pady=(5, 5))
+        return True
 
     def remove_flag(self, frame: customtkinter.CTkFrame, first_index: int):
         """
@@ -484,7 +487,7 @@ class App(customtkinter.CTk):
             tag = self.choose_tag.get().upper()
             base_name = f'{tag}_{select_ideology}'
 
-            for i, size in enumerate(sizes, start=1):
+            for i, size in enumerate(SIZES, start=1):
                 with Image.open(image_path) as image:
                     if i == 1:
                         ready_image = os.path.join(self.flags_folder_path, f'{base_name}.tga')
