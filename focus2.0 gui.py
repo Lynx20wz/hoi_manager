@@ -1,12 +1,9 @@
-import os
-import re
-import sys
-from PIL import Image
-from tkinter import filedialog
 import json
+import re
+from tkinter import filedialog
 
 import customtkinter
-from MoreCustomTkinterWidgets import askfile
+from PIL import Image
 
 import find_part_focus_in_file
 
@@ -119,37 +116,55 @@ class App_class(customtkinter.CTk):
         self.geometry("800x600")
         self.resizable(False, False)
         self.bg_image = customtkinter.CTkImage(Image.open("bg.jpg"), size=(800, 600))
-        self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
+        self.bg_image_label = customtkinter.CTkLabel(self, text='', image=self.bg_image)
         self.bg_image_label.grid(row=0, column=0)
         # self.attributes('-topmost', True) #закрепить наверху
         self.title("Modding manager")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure((0, 1, 2), weight=1)
 
-        tab = customtkinter.CTkTabview(self, width=800, height=570, corner_radius=15, anchor='nw')
-        tab.grid(row=0, column=0)
+        self.main_frame = customtkinter.CTkFrame(self)
+        self.main_frame.grid(row=0, column=0, pady=(40, 0))
 
-        tab.add('focus')
-        tab.set('focus')
-        tab.add('spirits')
+        self.bg_gradient = customtkinter.CTkImage(Image.open('gradient_bg.png'), size=(800, 560))
+        self.bg_gradient_label = customtkinter.CTkLabel(self.main_frame, text='', image=self.bg_gradient)
+        self.bg_gradient_label.grid(row=0, column=0)
+
+        self.tab = customtkinter.CTkTabview(self.main_frame, width=800, height=570, corner_radius=15, anchor='nw')
+        self.tab.grid(row=0, column=0)
+        self.tab.columnconfigure((0, 1), weight=1)
+        self.rowconfigure((0, 1, 2), weight=1)
+
+        self.tab.add('focus')
+        self.tab.set('focus')
+        self.tab.add('spirits')
 
         # кнопки
 
         # кнопка открыть файл
         self.btnopenfocusfile = customtkinter.CTkButton(
-                tab.tab('focus'), height=33, width=130, fg_color=C_DARK_BLUE,
+                self.tab.tab('focus'), height=33, width=130, fg_color=C_DARK_BLUE,
                 text='открыть', command=self.open_file, corner_radius=0, font=F_UNI_HEAVY_CAPS
         )
-        self.btnopenfocusfile.grid(padx=5, pady=(15, 0))
+        self.btnopenfocusfile.grid(column=0, row=0, pady=(15, 0), sticky='ew')
 
         # кнопка сохранить
         self.btnsavefocusfile = customtkinter.CTkButton(
-                tab.tab('focus'), height=33, width=130, fg_color=C_DARK_BLUE, text='сохранить', command=self.save_file,
+                self.tab.tab('focus'), height=33, width=130, fg_color=C_DARK_BLUE, text='сохранить', command=self.save_file,
                 corner_radius=0, font=F_UNI_HEAVY_CAPS
         )
-        self.btnsavefocusfile.grid(padx=5, pady=5)
+        self.btnsavefocusfile.grid(column=0, row=1, pady=5, sticky='ew')
 
         # кнопка обновления
         # self.updatebtn = customtkinter.CTkButton(master=tab.tab('focus'), command=lambda: app.update(), image=ico_uptade)
         # self.updatebtn.grid(padx=20, pady=30)
+
+        self.frame_with_focus = customtkinter.CTkScrollableFrame(
+                self.tab.tab('focus'), width=130, height=440, fg_color=C_DARK_BLUE, corner_radius=0,
+                label_text='FOCUSES', label_font=('Uni Sans Heavy Caps', 16), label_fg_color=C_DARK_BLUE,
+                scrollbar_button_color=C_DARK_BLUE, scrollbar_button_hover_color='#020092'
+        )
+        self.frame_with_focus.grid(column=0, row=2, pady=5, sticky='ew')
 
     def open_file(self):
         focus_file = filedialog.askopenfilename(title='Выберете фокус файл', filetypes=[('focus file', '*.txt')])
