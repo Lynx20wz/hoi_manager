@@ -53,12 +53,11 @@ def block_code(name_part: str, file, focus_dict: dict):
                 logger.info(part)
 
 
-def find_part_focus(file: str) -> dict:
+def find_part_focus(file: str) -> tuple[str, dict]:
     repetitive_tag = False
     name_country = file[file.rfind('/') + 1:file.find('.')]
-    tag = get_name_with_help_id(name_country)
+    tag = None
     number_of_spaces_focus = None
-    print(f'{name_country.capitalize()}: {tag}')
     with open(file, 'r', encoding='UTF-8') as focus_file:
         focus_block = False
         prerequisite = None
@@ -66,17 +65,18 @@ def find_part_focus(file: str) -> dict:
         for line in focus_file:
             number_of_spaces = line.count('\t')
             line = line.strip()
+            if line.startswith('original_tag =') and tag is None:
+                tag = line[len('original_tag = '):]
+                name_country = get_name_with_help_id(tag)
+                if tag in country and name_country not in country[tag]:
+                    repetitive_tag = True
+                    print(f'{name_country.capitalize()}: {tag}')
             if line.startswith('focus = {') or focus_block is True:
                 if number_of_spaces_focus is None:
                     number_of_spaces_focus = number_of_spaces
                 line = line.replace('#', '')
                 focus_block = True
                 if focus_block:
-                    if line.startswith('tag =') and tag is None:
-                        tag = line[len('tag = '):]
-                        name_country = get_name_with_help_id(tag)
-                        if tag in country and name_country not in country[tag]:
-                            repetitive_tag = True
                     if line.startswith('id ='):
                         if focus_dict.get('id') is None:
                             id_focus = line[len('id = '):]
@@ -138,7 +138,7 @@ def find_part_focus(file: str) -> dict:
                             country[tag][focus_dict.get('id')] = focus_dict.copy()
                         focus_dict.clear()
                         number_of_spaces_focus = None
-    return tag
+    return tag, country
 
 
 if __name__ == '__main__':
@@ -159,4 +159,4 @@ if __name__ == '__main__':
                     print("Команда не найдена! Повторите попытку.")
         else:
             logger.info('Выбран путь: ' + file)
-            find_part_focus(file)
+            print(find_part_focus(file))
