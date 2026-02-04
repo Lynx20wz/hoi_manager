@@ -1,5 +1,7 @@
 *.qrc
-venv/
+.venv/
 test folder/
 __pycache__/
 logs/
+*.py~
+.idea/

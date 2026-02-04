@@ -1,5 +1,4 @@
 import re
-import sys
 
 # import read_focus_folder
 
@@ -290,7 +289,7 @@ class country_class:
         self.ideologies = ideologies
         self.leader = leader
 
-        if create_country == True:
+        if create_country:
             create_country(tag, name, ideologies, capital, leader)
 
     def create_country(self, tag, name, ideologies, capital=None, leader=None):
@@ -310,8 +309,6 @@ class focus_class:
                                 'mutually_exclusive': self.mutually_exclusive}
         if create_focus == 1:
             self.focus_to_file(id, cost, prerequisite, mutually_exclusive)
-        else:
-            ...  # ничего не происходит
 
     def info(self):
         output = f'\nФокус: "{self.id}" | {self.cost}\n'
@@ -354,7 +351,7 @@ class focus_class:
         self.muex = mutually_exclusive
 
     def editing_focus(self):
-        ...
+        pass
 
     def focus_to_file(self, id, cost, prerequisite=None, mutually_exclusive=None):
         with open("focus.txt", 'a') as focus_file:
@@ -363,16 +360,16 @@ class focus_class:
             focus_file.write(focus_entry)
 
 
-def create_focus_tree(id):
-    id = id.upper()
+def create_focus_tree(id_):
+    id_ = id_.upper()
     with open("focus.txt", 'w') as focus_file:
         focus_tree = f'''focus_tree = {{
-    id = {id}_focus_tree
+    id = {id_}_focus_tree
     country = {{
         factor = 0
         modifier = {{
             add = 15
-            original_tag = {id}
+            original_tag = {id_}
         }} 
     }}'''
         focus_file.write(focus_tree)

@@ -126,7 +126,7 @@ class App_class(customtkinter.CTk):
         self.main_frame = customtkinter.CTkFrame(self)
         self.main_frame.grid(row=0, column=0, pady=(40, 0))
 
-        self.bg_gradient = customtkinter.CTkImage(Image.open('gradient_bg.png'), size=(800, 560))
+        self.bg_gradient = customtkinter.CTkImage(Image.open('res/gradient_bg.png'), size=(800, 560))
         self.bg_gradient_label = customtkinter.CTkLabel(self.main_frame, text='', image=self.bg_gradient)
         self.bg_gradient_label.grid(row=0, column=0)
 
